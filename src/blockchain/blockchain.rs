@@ -9,14 +9,7 @@ pub struct BlockChain{
 }
 
 impl BlockChain {
-     pub fn new_block(self, previous_block: Block, transaction: Transaction) -> Block {
-        Block{
-            id: Uuid::new_v4(),
-            index: previous_block.index + 1,
-            timestamp: Instant::now(),
-            transaction: transaction,
-        }
-    }
+
     pub fn append_new_block_to_chain(mut self, transaction: Transaction) -> BlockChain {
 
         match self.chain.last().copied() {
