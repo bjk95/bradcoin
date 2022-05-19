@@ -1,6 +1,6 @@
+use chrono::Utc;
 use crate::blockchain::transaction::Transaction;
 use uuid::Uuid;
-use std::time::Instant;
 use crate::blockchain::block::Block;
 
 #[derive(Debug)]
@@ -10,15 +10,15 @@ pub struct BlockChain{
 
 impl BlockChain {
 
-    pub fn append_new_block_to_chain(mut self, transaction: Transaction) -> BlockChain {
+    pub fn append_new_block_to_chain(mut self, transactions: Vec<Transaction>) -> BlockChain {
 
-        match self.chain.last().copied() {
+        match self.chain.last() {
             Some(b) => {
                 let new_block = Block{
                     id: Uuid::new_v4(),
-                    index: b.index + 1,
-                    timestamp: Instant::now(),
-                    transaction: transaction,
+                    timestamp: Utc::now(),
+                    transactions: transactions,
+                    previous_hash: b.clone().calculate_hash()
                 };
 
                 self.chain.push(new_block);
@@ -29,9 +29,9 @@ impl BlockChain {
             None => {
                 let new_block = Block{
                     id: Uuid::new_v4(),
-                    index: 0,
-                    timestamp: Instant::now(),
-                    transaction: transaction,
+                    timestamp: Utc::now(),
+                    transactions: transactions,
+                    previous_hash: u64::MIN
                 };
 
                 self.chain.push(new_block);
@@ -39,8 +39,11 @@ impl BlockChain {
                 self
             }
         }
+    }
 
-
+    pub fn print_blocks(self) {
+        let chain_string: String = self.chain.iter().map(|b| b.clone().pretty_fmt()).fold(String::new(), |x,y| format!("{}{}", x,y));
+        println!("{}", chain_string)
     }
 }
 
